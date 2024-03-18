@@ -63,7 +63,7 @@ Before running the script, ensure that:
 This script is a basic example to demonstrate the process. Depending on your specific requirements, you might need to adjust the Helm command options, the `yq` query, or other parts of the script.
 
 
-```
+```groovy
 #!/usr/bin/env groovy
 
 def helmChartPath = '/path/to/your/helm/chart'
