@@ -61,3 +61,37 @@ Before running the script, ensure that:
 - You update the `helmChartPath`, `releaseName`, and `namespace` variables in the script to match your Helm chart's location and desired release information.
 
 This script is a basic example to demonstrate the process. Depending on your specific requirements, you might need to adjust the Helm command options, the `yq` query, or other parts of the script.
+
+
+```
+#!/usr/bin/env groovy
+
+def helmChartPath = '/path/to/your/helm/chart'
+def releaseName = 'your-release'
+def namespace = 'your-namespace'
+
+// Generate Kubernetes manifest using Helm and capture the output
+def helmOutput = "helm template ${releaseName} ${helmChartPath} --namespace ${namespace}".execute().text
+
+// Use yq to parse the replicas value from the Deployment in the Helm output, directly from the previous command's output
+def yqProcess = ['sh', '-c', "echo '''${helmOutput}''' | yq e '.spec.replicas' - | head -n 1"].execute()
+yqProcess.waitFor()
+
+// Assuming the first line of output is the replica count
+def replicaCount = yqProcess.text.trim().toInteger()
+
+// Check replicas count
+if (replicaCount >= 2) {
+    println "Replica count is greater than or equal to 2: ${replicaCount}"
+} else {
+    println "Replica count is less than 2: ${replicaCount}"
+}
+
+// Check ENV_VAR pattern
+def envVar = System.getenv("ENV_VAR")
+if (envVar ==~ /^prod(-.*)?$/) {
+    println "ENV_VAR matches the pattern 'prod' or 'prod-*'"
+} else {
+    println "ENV_VAR does not match the pattern 'prod' or 'prod-*'"
+}
+```
