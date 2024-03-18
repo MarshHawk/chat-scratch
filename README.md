@@ -124,7 +124,7 @@ if (envVar ==~ /^prod(-.*)?$/) {
 
 ```
 
-```
+```groovy
 #!/usr/bin/env groovy
 
 def helmChartPath = '/path/to/your/helm/chart'
@@ -148,4 +148,30 @@ if (envVar ==~ /^prod(-.*)?$/) {
     println "ENV_VAR matches the pattern 'prod' or 'prod-*'"
 } else {
 
+```
+
+```Dockerfile
+# Start from a Java image as Groovy runs on the JVM
+FROM openjdk:8-jdk-alpine
+
+# Install Groovy
+RUN apk add --no-cache curl unzip && \
+    curl -L https://bintray.com/artifact/download/groovy/maven/apache-groovy-binary-3.0.8.zip -o /tmp/groovy.zip && \
+    unzip /tmp/groovy.zip -d /opt && \
+    ln -s /opt/groovy-3.0.8/bin/groovy /usr/bin/groovy && \
+    rm /tmp/groovy.zip
+
+# Copy your Groovy script into the container
+COPY verifyHelm.groovy /verifyHelm.groovy
+
+# Ensure the script is executable
+RUN chmod +x /verifyHelm.groovy
+
+# Set the entrypoint to execute the Groovy script
+ENTRYPOINT ["groovy", "/verifyHelm.groovy"]
+```
+
+```bash
+docker build -t groovy-script-runner .
+docker run -e ENV_VAR=prod-123 groovy-script-runner
 ```
