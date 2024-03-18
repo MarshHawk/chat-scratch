@@ -95,3 +95,31 @@ if (envVar ==~ /^prod(-.*)?$/) {
     println "ENV_VAR does not match the pattern 'prod' or 'prod-*'"
 }
 ```
+
+```groovy
+#!/usr/bin/env groovy
+
+def helmChartPath = '/path/to/your/helm/chart'
+def releaseName = 'your-release'
+def namespace = 'your-namespace'
+
+// Directly parse the replicas value using yq after generating the output with helm template
+def replicaCountCmd = "helm template ${releaseName} ${helmChartPath} --namespace ${namespace} | yq e '.spec.replicas' - | head -n 1"
+def replicaCount = replicaCountCmd.execute().text.trim().toInteger()
+
+// Check replicas count
+if (replicaCount >= 2) {
+    println "Replica count is greater than or equal to 2: ${replicaCount}"
+} else {
+    println "Replica count is less than 2: ${replicaCount}"
+}
+
+// Check ENV_VAR pattern
+def envVar = System.getenv("ENV_VAR")
+if (envVar ==~ /^prod(-.*)?$/) {
+    println "ENV_VAR matches the pattern 'prod' or 'prod-*'"
+} else {
+    println "ENV_VAR does not match the pattern 'prod' or 'prod-*'"
+}
+
+```
