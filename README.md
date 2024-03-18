@@ -123,3 +123,29 @@ if (envVar ==~ /^prod(-.*)?$/) {
 }
 
 ```
+
+```
+#!/usr/bin/env groovy
+
+def helmChartPath = '/path/to/your/helm/chart'
+def releaseName = 'your-release'
+def namespace = 'your-namespace'
+
+// Define the command to extract the replicas count specifically from a Deployment resource
+def replicaCountCmd = "helm template ${releaseName} ${helmChartPath} --namespace ${namespace} | yq e 'select(.kind == \"Deployment\") | .spec.replicas' - | head -n 1"
+def replicaCount = replicaCountCmd.execute().text.trim().toInteger()
+
+// Check replicas count
+if (replicaCount >= 2) {
+    println "Replica count is greater than or equal to 2: ${replicaCount}"
+} else {
+    println "Replica count is less than 2: ${replicaCount}"
+}
+
+// Check ENV_VAR pattern
+def envVar = System.getenv("ENV_VAR")
+if (envVar ==~ /^prod(-.*)?$/) {
+    println "ENV_VAR matches the pattern 'prod' or 'prod-*'"
+} else {
+
+```
